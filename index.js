@@ -66,12 +66,12 @@ function wrapAwaitOutside(source) {
   const [_, assign, expression] = source.replace(/@\s*/, 'await ').match(re);
 
   // strange indentation keeps column offset correct in stack traces
-  const wrappedExpression = `(async function() { try { ${assign ? `global.${RESULT} =` : "return"} (
+  const wrappedExpression = `(async function() { try { ${assign ? `return global.${RESULT} =` : "return"} (
 ${expression.trim()}
 ); } catch(e) { global.ERROR = e; throw e; } }())`;
 
   const assignment = assign
-    ? `${assign.trim()} global.${RESULT}; void delete global.${RESULT};`
+    ? `setImmediate(function() { delete global.${RESULT} }); ${assign.trim()} global.${RESULT};`
     : null;
 
   return [wrappedExpression, assignment];
