@@ -54,7 +54,7 @@ function formatError(error, source) {
   - this is overly restrictive but is easier to maintain
 - capture `await <anything that follows it>`
 */
-let re = /^\s*((?:(?:var|const|let)\s+)?[a-zA-Z_$][0-9a-zA-Z_$]*\s*=\s*)?(\(?\s*await[\s\S]*)/;
+let re = /^\s*((?:(?:var|const|let)\s+)?[a-zA-Z_$][0-9a-zA-Z_$]*\s*=\s*)?(\(?\s*(?:await|@)[\s\S]*)/;
 
 function isAwaitOutside(source) {
   return re.test(source);
@@ -63,7 +63,7 @@ function isAwaitOutside(source) {
 const RESULT = "__await_outside_result";
 
 function wrapAwaitOutside(source) {
-  const [_, assign, expression] = source.match(re);
+  const [_, assign, expression] = source.replace(/@\s*/, 'await ').match(re);
 
   // strange indentation keeps column offset correct in stack traces
   const wrappedExpression = `(async function() { try { ${assign ? `global.${RESULT} =` : "return"} (
